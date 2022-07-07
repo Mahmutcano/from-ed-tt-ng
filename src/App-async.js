@@ -1,17 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import userList from "./data.js";
 import UserTable from "./tables/UserTable";
 import AddUserForm from "./forms/AddUserForm";
 import EditUserForm from "./forms/EditUserForm";
 
+import { useAsyncRequest } from "./hooks";
 
 const App = () => {
-  const fetchData = userList[0].data.map(x => x)
-  const [users, setUsers] = useState(fetchData);
-  
+  const [data, loading] = useAsyncRequest(3);
+  // Fixed array of users:
+  // const [users, setUsers] = userList;
+  const [users, setUsers] = useState(null);
+
+  useEffect(() => {
+    if (data) {
+      const formattedUsers = data.map((obj, i) => {
+        return {
+          id: i,
+          name: obj.name.first,
+          username: obj.name.first + " " + obj.name.last,
+        };
+      });
+      setUsers(formattedUsers);
+    }
+  }, [data]);
 
   const addUser = (user) => {
-    user.id = users.length + 1;
+    user.id = users.length;
     setUsers([...users, user]);
   };
 
@@ -21,7 +36,7 @@ const App = () => {
 
   const [editing, setEditing] = useState(false);
 
-  const initialUser = { id: null, mail: "", userName: "" };
+  const initialUser = { id: null, name: "", username: "" };
 
   const [currentUser, setCurrentUser] = useState(initialUser);
 
@@ -40,12 +55,12 @@ const App = () => {
 
   return (
     <div className="container">
-      <h3>Data Grid</h3>
+      <h1>React CRUD App with Hooks</h1>
       <div className="row">
-        <div className="columns">
+        <div className="five columns">
           {editing ? (
             <div>
-              <h4>Edit user</h4>
+              <h2>Edit user</h2>
               <EditUserForm
                 currentUser={currentUser}
                 setEditing={setEditing}
@@ -54,19 +69,24 @@ const App = () => {
             </div>
           ) : (
             <div>
-              <h4>Add user</h4>
+              <h2>Add user</h2>
               <AddUserForm addUser={addUser} />
             </div>
           )}
         </div>
-        <div className="columns">
-          <h4>View users</h4>
-          <UserTable
-            users={users}
-            deleteUser={deleteUser}
-            editUser={editUser}
-          />
-        </div>
+        {loading || !users ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="seven columns">
+            <h2>View users</h2>
+
+            <UserTable
+              users={users}
+              deleteUser={deleteUser}
+              editUser={editUser}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
