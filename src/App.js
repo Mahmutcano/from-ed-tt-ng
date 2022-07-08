@@ -1,27 +1,40 @@
-import React, { useState } from "react";
-import userList from "./data.js";
+import React, { useState, useEffect } from "react";
 import UserTable from "./tables/UserTable";
 import AddUserForm from "./forms/AddUserForm";
-import EditUserForm from "./forms/EditUserForm";
-
+import Pagination from "./tables/Pagination";
 
 const App = () => {
-  const fetchData = userList[0].data.map(x => x)
-  const [users, setUsers] = useState(fetchData);
-  
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(10);
 
-  const addUser = (user) => {
+  useEffect(() => {
+    getData();
+  }, []);
+
+  async function getData() {
+    setLoading(true);
+    const result = await fetch("https://176.53.61.139:7127/Mediator/Get");
+    const getResult = await result.json();
+    setUsers(getResult.data);
+    setLoading(false);
+  }
+
+   const addUser = (user) => {
     user.id = users.length + 1;
     setUsers([...users, user]);
-  };
 
-  const deleteUser = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
-  };
+    fetch("https://176.53.61.139:7127/Mediator/Edit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    }).then((response) => response.json()).then(user => console.log(user))
+  }
 
-  const [editing, setEditing] = useState(false);
+  const [setEditing] = useState(false);
 
-  const initialUser = { id: null, mail: "", userName: "" };
+  const initialUser = { id: null, mail: "", name: "" };
 
   const [currentUser, setCurrentUser] = useState(initialUser);
 
@@ -38,34 +51,40 @@ const App = () => {
     setEditing(false);
   };
 
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = users.slice(indexOfFirstPost, indexOfLastPost);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
-    <div className="container">
+    <div className="container mt-5">
       <h3>Data Grid</h3>
       <div className="row">
-        <div className="columns">
-          {editing ? (
+        <div className="col">
+          {
             <div>
-              <h4>Edit user</h4>
-              <EditUserForm
-                currentUser={currentUser}
-                setEditing={setEditing}
-                updateUser={updateUser}
-              />
-            </div>
-          ) : (
-            <div>
-              <h4>Add user</h4>
               <AddUserForm addUser={addUser} />
             </div>
-          )}
+          }
         </div>
-        <div className="columns">
-          <h4>View users</h4>
+        <div className="mx-auto">
           <UserTable
-            users={users}
-            deleteUser={deleteUser}
+            users={currentPosts}
+            currentUser={currentUser}
             editUser={editUser}
+            setEditing={setEditing}
+            updateUser={updateUser}
+            loading={loading}
           />
+          <div>
+            {" "}
+            <Pagination
+              postsPerPage={postsPerPage}
+              totalPosts={users.length}
+              paginate={paginate}
+            />
+          </div>
         </div>
       </div>
     </div>

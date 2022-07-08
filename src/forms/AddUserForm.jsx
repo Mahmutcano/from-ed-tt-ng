@@ -10,7 +10,6 @@ const AddUserForm = (props) => {
     setUser({ ...user, [name]: value });
   };
 
-  console.log(user);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (user.name && user.mail) {
@@ -28,7 +27,6 @@ const AddUserForm = (props) => {
             data-bs-toggle="collapse"
             data-bs-target="#flush-collapseOne"
             aria-expanded="false"
-           
           ></button>
         </h2>
         <div
@@ -38,9 +36,12 @@ const AddUserForm = (props) => {
           data-bs-parent="#accordionFlushExample"
         >
           <div className="accordion-body">
-            <form className="px-4 py-3">
+            <form className="px-4 py-3" onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label htmlFor="exampleDropdownFormEmail1" className="form-label">
+                <label
+                  htmlFor="exampleDropdownFormEmail1"
+                  className="form-label"
+                >
                   Mail
                 </label>
                 <input
@@ -54,7 +55,10 @@ const AddUserForm = (props) => {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="exampleDropdownFormPassword1" className="form-label">
+                <label
+                  htmlFor="exampleDropdownFormPassword1"
+                  className="form-label"
+                >
                   Name
                 </label>
                 <input
@@ -70,7 +74,6 @@ const AddUserForm = (props) => {
               <button
                 type="submit"
                 className="btn btn-primary"
-                onClick={handleSubmit}
               >
                 Add
               </button>
@@ -79,7 +82,6 @@ const AddUserForm = (props) => {
         </div>
       </div>
     </div>
-    
   );
 };
 
