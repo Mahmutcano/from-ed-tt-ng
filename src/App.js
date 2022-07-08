@@ -21,16 +21,21 @@ const App = () => {
     setLoading(false);
   }
 
-   const addUser = (user) => {
+  const addUser = (user) => {
     user.id = users.length + 1;
     setUsers([...users, user]);
 
     fetch("https://176.53.61.139:7127/Mediator/Edit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "post",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'this-can-be-anything'
+      },
       body: JSON.stringify(user),
-    }).then((response) => response.json()).then(user => console.log(user))
-  }
+    })
+      .then((response) => response.json())
+      .then((user) => console.log(user)).catch(err => console.log(err));
+  };
 
   const [setEditing] = useState(false);
 
